@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     /*
@@ -14,11 +12,7 @@ plugins {
 kotlin {
 
     //this is only used as kapt / ksp (annotation processor, so pure jvm)
-    jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
+    jvm()
 
     sourceSets {
 

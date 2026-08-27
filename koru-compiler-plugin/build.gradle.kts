@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     `kotlin-dsl`
     id("maven-publish")
@@ -29,14 +27,4 @@ gradlePlugin {
 koruPublishing {
     pomName = "Koru - Gradle Plugin"
     pomDescription = "Wrappers for suspend functions / Flow in Kotlin Native - gradle plugin."
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
 }

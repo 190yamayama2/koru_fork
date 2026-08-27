@@ -6,6 +6,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.jetbrains.dokka.gradle.DokkaPlugin
@@ -32,15 +33,27 @@ class PublishPlugin : Plugin<Project> {
             val pomDescription = extension.pomDescription ?: throwIllegalConfig("pomDescription")
 
             try {
+                val publishConfigAvailable = project.publishConfigAvailable()
                 val javadocJar = project.createJavaDoc()
                 project.configureMavenPublication(javadocJar, pomName, pomDescription)
-                project.configureArtifactSigning()
+                if (publishConfigAvailable) {
+                    project.configureArtifactSigning()
+                } else {
+                    logger.warn("Warning: Publish config missing (no local.properties), signing skipped.")
+                    project.tasks.withType<Sign>().configureEach {
+                        enabled = false
+                    }
+                    project.extensions.getByType<PublishingExtension>().publications.withType(MavenPublication::class).configureEach {
+                        artifacts.removeIf { artifact ->
+                            artifact.extension == "asc" || artifact.file.name.endsWith(".asc")
+                        }
+                    }
+                }
             } catch (e: FileNotFoundException) {
                 //we can safely ignore that, will be missing in e.g. CI env
                 logger.warn("Warning: Publish config missing (no local.properties), skipping.")
             }
         }
-
     }
 
     private fun Project.createJavaDoc(): Jar {
@@ -136,6 +149,9 @@ class PublishPlugin : Plugin<Project> {
         load(FileInputStream(File(rootProject.rootDir, "local.properties")))
     }
 
+    private fun Project.publishConfigAvailable(): Boolean =
+        File(rootProject.rootDir, "local.properties").exists()
+
     /**
     Sign all artifacts
     Requires following properties to be set in ~/.gradle/gradle.properties
@@ -145,6 +161,7 @@ class PublishPlugin : Plugin<Project> {
     signing.secretKeyRingFile=
      */
     private fun Project.configureArtifactSigning() {
+        if (!publishConfigAvailable()) return
         project.extensions.getByType<SigningExtension>().run {
             try {
                 sign(project.extensions.getByType<PublishingExtension>().publications)
