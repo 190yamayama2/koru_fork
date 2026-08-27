@@ -6,7 +6,6 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
-import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.jetbrains.dokka.gradle.DokkaPlugin
@@ -22,9 +21,12 @@ class PublishPlugin : Plugin<Project> {
     override fun apply(project: Project) {
 
         val extension: PublishPluginExtension = project.extensions.create("koruPublishing")
+        val publishConfigAvailable = project.publishConfigAvailable()
 
         project.pluginManager.apply(PublishingPlugin::class)
-        project.pluginManager.apply(SigningPlugin::class)
+        if (publishConfigAvailable) {
+            project.pluginManager.apply(SigningPlugin::class)
+        }
         project.pluginManager.apply(DokkaPlugin::class)
 
         project.afterEvaluate {
@@ -33,21 +35,12 @@ class PublishPlugin : Plugin<Project> {
             val pomDescription = extension.pomDescription ?: throwIllegalConfig("pomDescription")
 
             try {
-                val publishConfigAvailable = project.publishConfigAvailable()
                 val javadocJar = project.createJavaDoc()
                 project.configureMavenPublication(javadocJar, pomName, pomDescription)
                 if (publishConfigAvailable) {
                     project.configureArtifactSigning()
                 } else {
                     logger.warn("Warning: Publish config missing (no local.properties), signing skipped.")
-                    project.tasks.withType<Sign>().configureEach {
-                        enabled = false
-                    }
-                    project.extensions.getByType<PublishingExtension>().publications.withType(MavenPublication::class).configureEach {
-                        artifacts.removeIf { artifact ->
-                            artifact.extension == "asc" || artifact.file.name.endsWith(".asc")
-                        }
-                    }
                 }
             } catch (e: FileNotFoundException) {
                 //we can safely ignore that, will be missing in e.g. CI env
