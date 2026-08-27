@@ -238,7 +238,7 @@ Similar helper functions can be easily created for RxSwift.
 
 ## Download
 
-The artifacts are available on Maven Central and the compiler plugin in Gradle Plugin Portal. 
+The artifacts are available on Maven Central and the compiler plugin in Gradle Plugin Portal.
 
 To use the library in a KMM project, use this config in the `build.gradle.kts`:
 
@@ -246,7 +246,7 @@ To use the library in a KMM project, use this config in the `build.gradle.kts`:
 plugins {
     //add ksp and koru compiler plugin
     id("com.google.devtools.ksp") version "1.6.21-1.0.6"
-    id("com.futuremind.koru").version("0.11.1")
+    id("com.futuremind.koru").version("0.12.0-beta01")
 }
 
 kotlin {
@@ -256,7 +256,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 // add library dependency
-                implementation("com.futuremind:koru:0.11.1")
+                implementation("com.futuremind:koru:0.12.0-beta01")
             }
         }
       
@@ -299,10 +299,10 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 ...
-                implementation("com.futuremind:koru:0.12.0")
+                implementation("com.futuremind:koru:0.12.0-beta01")
                 configurations.get("kapt").dependencies.add(
                     org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency(
-                        "com.futuremind", "koru-processor", "0.12.0"
+                        "com.futuremind", "koru-processor", "0.12.0-beta01"
                     )
                 )
 

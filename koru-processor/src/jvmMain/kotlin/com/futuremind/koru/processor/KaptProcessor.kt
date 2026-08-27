@@ -5,7 +5,6 @@ import com.futuremind.koru.processor.builders.ScopeProviderBuilder
 import com.futuremind.koru.processor.builders.WrapperClassBuilder
 import com.futuremind.koru.processor.builders.WrapperInterfaceBuilder
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.classinspectors.ElementsClassInspector
 import com.squareup.kotlinpoet.metadata.specs.ClassInspector
 import com.squareup.kotlinpoet.metadata.specs.toTypeSpec
@@ -23,7 +22,6 @@ import javax.tools.Diagnostic.Kind.ERROR
 
 const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
 
-@OptIn(KotlinPoetMetadataPreview::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 class KaptProcessor : AbstractProcessor() {
 
@@ -42,6 +40,7 @@ class KaptProcessor : AbstractProcessor() {
             ?: throw IllegalStateException("Cannot access kaptKotlinGeneratedDir")
 
         val classInspector = ElementsClassInspector.create(
+            false,
             processingEnv.elementUtils,
             processingEnv.typeUtils
         )
@@ -115,7 +114,7 @@ class KaptProcessor : AbstractProcessor() {
     ): GeneratedPropertySpec {
 
         val packageName = element.getPackage(processingEnv)
-        val scopeClassSpec = (element as TypeElement).toTypeSpec(classInspector)
+        val scopeClassSpec = (element as TypeElement).toTypeSpec(false, classInspector)
         val originalClassName = element.getClassName(processingEnv)
         val scopeProviderClassName = ClassName(packageName, scopeClassSpec.name.toString())
         val scopePropertyName = scopeProviderPropertyName(scopeProviderClassName)
@@ -142,7 +141,7 @@ class KaptProcessor : AbstractProcessor() {
     ): GeneratedInterfaceSpec {
 
         val originalTypeName = element.getClassName(processingEnv)
-        val originalTypeSpec = (element as TypeElement).toTypeSpec(classInspector)
+        val originalTypeSpec = (element as TypeElement).toTypeSpec(false, classInspector)
         val annotation = element.getAnnotation(ToNativeInterface::class.java)
         val newTypeName = interfaceName(annotation, originalTypeName.simpleName)
 
@@ -171,7 +170,7 @@ class KaptProcessor : AbstractProcessor() {
     ): GeneratedClassSpec {
 
         val originalTypeName = element.getClassName(processingEnv)
-        val originalTypeSpec = (element as TypeElement).toTypeSpec(classInspector)
+        val originalTypeSpec = (element as TypeElement).toTypeSpec(false, classInspector)
         val annotation = element.getAnnotation(ToNativeClass::class.java)
         val newTypeName = className(annotation, originalTypeName.simpleName)
 

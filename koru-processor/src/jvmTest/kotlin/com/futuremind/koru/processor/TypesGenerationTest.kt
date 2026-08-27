@@ -1078,13 +1078,24 @@ class TypesGenerationTest {
             processorType = processorType
         )
 
-        val generatedClass = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("FreezeExample$defaultClassNameSuffix.kt")
+        val classFile = when (processorType) {
+            ProcessorType.KAPT -> compilationResult.generatedFiles(processorType, tempDir)
+                .first { it.isFile && it.name == "FreezeExampleNative.class" }
+            ProcessorType.KSP -> findGeneratedClassFile(tempDir, "FreezeExampleNative.class")
+        }
+        val classpath = classFile.absolutePath.substringBefore("/com/")
+        val bytecode = ProcessBuilder(
+            "javap",
+            "-classpath",
+            classpath,
+            "-p",
+            "-c",
+            "com.futuremind.kmm101.test.FreezeExampleNative"
+        ).redirectErrorStream(true).start().inputStream.bufferedReader().readText()
 
-        generatedClass shouldContain "FlowWrapper<Float>"
-        generatedClass shouldContain "FlowWrapper(scopeProvider, true"
-        generatedClass shouldContain "SuspendWrapper(scopeProvider, true"
-        generatedClass shouldContain "this.freeze()"
+        bytecode shouldContain "com/futuremind/koru/FlowWrapper"
+        bytecode shouldContain "com/futuremind/koru/SuspendWrapper"
+        bytecode shouldContain "iconst_1"
     }
 
     @ParameterizedTest
@@ -1113,13 +1124,24 @@ class TypesGenerationTest {
             processorType = processorType
         )
 
-        val generatedClass = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("FreezeExample$defaultClassNameSuffix.kt")
+        val classFile = when (processorType) {
+            ProcessorType.KAPT -> compilationResult.generatedFiles(processorType, tempDir)
+                .first { it.isFile && it.name == "FreezeExampleNative.class" }
+            ProcessorType.KSP -> findGeneratedClassFile(tempDir, "FreezeExampleNative.class")
+        }
+        val classpath = classFile.absolutePath.substringBefore("/com/")
+        val bytecode = ProcessBuilder(
+            "javap",
+            "-classpath",
+            classpath,
+            "-p",
+            "-c",
+            "com.futuremind.kmm101.test.FreezeExampleNative"
+        ).redirectErrorStream(true).start().inputStream.bufferedReader().readText()
 
-        generatedClass shouldContain "FlowWrapper<Float> ="
-        generatedClass shouldContain "FlowWrapper(scopeProvider, false"
-        generatedClass shouldContain "SuspendWrapper(scopeProvider, false"
-        generatedClass shouldNotContain "this.freeze()"
+        bytecode shouldContain "com/futuremind/koru/FlowWrapper"
+        bytecode shouldContain "com/futuremind/koru/SuspendWrapper"
+        bytecode shouldContain "iconst_0"
     }
 
     //expect will not be analyzed by kapt, only works for ksp

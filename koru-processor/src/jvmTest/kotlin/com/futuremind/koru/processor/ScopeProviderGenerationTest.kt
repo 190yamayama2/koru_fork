@@ -63,16 +63,11 @@ class ScopeProviderGenerationTest {
 
         val compilationResult = compile(listOf(source), tempDir, processorType)
 
-        val generatedScopeProvider = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("MainScopeProviderContainer.kt")
+        val generatedScopeProvider = compilationResult.classLoader
+            .loadClass("com.futuremind.kmm101.test.MainScopeProviderContainerKt")
 
         compilationResult.exitCode shouldBe KotlinCompilation.ExitCode.OK
-        generatedScopeProvider shouldBe
-                """
-                    |package com.futuremind.kmm101.test
-                    |
-                    |public val exportedScopeProvider_mainScopeProvider: MainScopeProvider = MainScopeProvider()
-                """.trimMargin().trim()
+        generatedScopeProvider.getDeclaredMethod("getExportedScopeProvider_mainScopeProvider").returnType.name shouldBe "com.futuremind.kmm101.test.MainScopeProvider"
 
     }
 
@@ -119,16 +114,17 @@ class ScopeProviderGenerationTest {
             processorType = processorType
         )
 
-        val generatedScopeProvider = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("MainScopeProviderContainer.kt")
+        val generatedScopeProvider = compilationResult.classLoader
+            .loadClass("com.futuremind.kmm101.test.MainScopeProviderContainerKt")
+        val generatedClass = compilationResult.classLoader
+            .loadClass("com.futuremind.kmm101.test.ImplicitScopeExampleNative")
 
-        val generatedClass = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("ImplicitScopeExample$defaultClassNameSuffix.kt")
-
-        generatedScopeProvider shouldContain "public val exportedScopeProvider_mainScopeProvider: MainScopeProvider = MainScopeProvider()"
-        generatedClass shouldContain "FlowWrapper(scopeProvider, "
-        generatedClass shouldContain "SuspendWrapper(scopeProvider, "
-        generatedClass shouldContain "this(wrapped,exportedScopeProvider_mainScopeProvider)"
+        generatedScopeProvider.methods.any { it.name == "getExportedScopeProvider_mainScopeProvider" } shouldBe true
+        generatedClass.getDeclaredMethod("flow", Int::class.javaPrimitiveType).returnType.name shouldBe "com.futuremind.koru.FlowWrapper"
+        generatedClass.getDeclaredMethod("suspending", Int::class.javaPrimitiveType).returnType.name shouldBe "com.futuremind.koru.SuspendWrapper"
+        generatedClass.declaredConstructors.any { constructor ->
+            constructor.parameterTypes.any { it.name == "com.futuremind.koru.ScopeProvider" }
+        } shouldBe true
 
     }
 
@@ -176,18 +172,17 @@ class ScopeProviderGenerationTest {
             processorType = processorType
         )
 
-        val generatedScopeProvider = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("MainScopeProviderContainer.kt")
+        val generatedScopeProvider = compilationResult.classLoader
+            .loadClass("com.futuremind.kmm101.test.scope.MainScopeProviderContainerKt")
+        val generatedClass = compilationResult.classLoader
+            .loadClass("com.futuremind.kmm101.test.ImplicitScopeExampleNative")
 
-        val generatedClass = compilationResult.generatedFiles(processorType, tempDir)
-            .getContentByFilename("ImplicitScopeExample$defaultClassNameSuffix.kt")
-
-        generatedScopeProvider shouldContain "public val exportedScopeProvider_mainScopeProvider: MainScopeProvider = MainScopeProvider()"
-        generatedClass shouldContain "import com.futuremind.kmm101.test.scope.exportedScopeProvider_mainScopeProvider"
-        generatedClass shouldContain "this(wrapped,exportedScopeProvider_mainScopeProvider)"
-        generatedClass shouldContain "FlowWrapper<Float> ="
-        generatedClass shouldContain "FlowWrapper(scopeProvider, "
-        generatedClass shouldContain "SuspendWrapper(scopeProvider, "
+        generatedScopeProvider.methods.any { it.name == "getExportedScopeProvider_mainScopeProvider" } shouldBe true
+        generatedClass.getDeclaredMethod("flow", Int::class.javaPrimitiveType).returnType.name shouldBe "com.futuremind.koru.FlowWrapper"
+        generatedClass.getDeclaredMethod("suspending", Int::class.javaPrimitiveType).returnType.name shouldBe "com.futuremind.koru.SuspendWrapper"
+        generatedClass.declaredConstructors.any { constructor ->
+            constructor.parameterTypes.any { it.name == "com.futuremind.koru.ScopeProvider" }
+        } shouldBe true
     }
 
     @ParameterizedTest

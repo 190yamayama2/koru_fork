@@ -3,7 +3,6 @@ package com.futuremind.koru.processor
 import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.metadata.KotlinPoetMetadataPreview
 import com.squareup.kotlinpoet.metadata.specs.ClassInspector
 import com.squareup.kotlinpoet.metadata.specs.toTypeSpec
 import java.util.*
@@ -12,13 +11,12 @@ import javax.lang.model.element.Element
 import javax.lang.model.element.TypeElement
 
 
-@OptIn(KotlinPoetMetadataPreview::class)
 internal fun Collection<Element>.sortByInheritance(
     classInspector: ClassInspector,
     processingEnv: ProcessingEnvironment
 ) = sortByInheritance(
     { it.getClassName(processingEnv) },
-    { (it as TypeElement).toTypeSpec(classInspector).superinterfaces.keys }
+    { (it as TypeElement).toTypeSpec(false, classInspector).superinterfaces.keys }
 )
 
 fun Collection<KSClassDeclaration>.sortByInheritance() = sortByInheritance(

@@ -6,6 +6,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.plugins.PublishingPlugin
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.*
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.gradle.plugins.signing.SigningPlugin
 import org.jetbrains.dokka.gradle.DokkaPlugin
@@ -19,34 +20,36 @@ import java.io.FileNotFoundException
 class PublishPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
-
         val extension: PublishPluginExtension = project.extensions.create("koruPublishing")
-        val publishConfigAvailable = project.publishConfigAvailable()
 
         project.pluginManager.apply(PublishingPlugin::class)
-        if (publishConfigAvailable) {
-            project.pluginManager.apply(SigningPlugin::class)
-        }
         project.pluginManager.apply(DokkaPlugin::class)
 
         project.afterEvaluate {
 
             val pomName = extension.pomName ?: throwIllegalConfig("pomName")
             val pomDescription = extension.pomDescription ?: throwIllegalConfig("pomDescription")
+            val publishConfigAvailable = project.publishConfigAvailable()
+            val shouldSignArtifacts = publishConfigAvailable && !project.version.toString().contains("beta", ignoreCase = true)
 
             try {
                 val javadocJar = project.createJavaDoc()
                 project.configureMavenPublication(javadocJar, pomName, pomDescription)
-                if (publishConfigAvailable) {
+                if (shouldSignArtifacts) {
+                    project.pluginManager.apply(SigningPlugin::class)
                     project.configureArtifactSigning()
                 } else {
-                    logger.warn("Warning: Publish config missing (no local.properties), signing skipped.")
+                    logger.warn("Warning: Signing skipped for this publication.")
+                    project.tasks.withType<Sign>().configureEach {
+                        enabled = false
+                    }
                 }
             } catch (e: FileNotFoundException) {
                 //we can safely ignore that, will be missing in e.g. CI env
                 logger.warn("Warning: Publish config missing (no local.properties), skipping.")
             }
         }
+
     }
 
     private fun Project.createJavaDoc(): Jar {
@@ -154,7 +157,7 @@ class PublishPlugin : Plugin<Project> {
     signing.secretKeyRingFile=
      */
     private fun Project.configureArtifactSigning() {
-        if (!publishConfigAvailable()) return
+        if (!publishConfigAvailable() || version.toString().contains("beta", ignoreCase = true)) return
         project.extensions.getByType<SigningExtension>().run {
             try {
                 sign(project.extensions.getByType<PublishingExtension>().publications)

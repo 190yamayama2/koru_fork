@@ -30,7 +30,7 @@ class CompilerPlugin : Plugin<Project> {
 
     private fun Project.enableKspRunForCommonMainSourceSet() = dependencies {
         //todo don't hardcode version
-        add("kspCommonMainMetadata", "com.futuremind:koru-processor:0.12.0")
+        add("kspCommonMainMetadata", "com.futuremind:koru-processor:0.12.0-beta01")
     }
 
     private fun Project.makeSureCompilationIsRunAfterKsp() = tasks
@@ -68,5 +68,4 @@ class CompilerPlugin : Plugin<Project> {
 open class KoruPluginExtension {
     var nativeSourceSetNames: List<String> = listOf()
 }
-
 

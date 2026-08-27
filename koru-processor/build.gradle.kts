@@ -22,7 +22,7 @@ kotlin {
                 implementation(project(":koru"))
 
                 //code generation
-                val kotlinpoetVersion = "1.12.0"
+                val kotlinpoetVersion = "1.18.1"
                 implementation("com.squareup:kotlinpoet:$kotlinpoetVersion")
                 implementation("com.squareup:kotlinpoet-metadata:$kotlinpoetVersion")
                 implementation("com.squareup:kotlinpoet-ksp:$kotlinpoetVersion")
@@ -40,6 +40,7 @@ kotlin {
                 implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
                 runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
                 implementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+                implementation(kotlin("reflect"))
                 implementation("com.github.tschuchortdev:kotlin-compile-testing:$compileTestingVersion")
                 implementation("com.github.tschuchortdev:kotlin-compile-testing-ksp:$compileTestingVersion")
                 implementation("io.kotest:kotest-assertions-core:4.6.3")

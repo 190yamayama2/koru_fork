@@ -80,7 +80,15 @@ fun KotlinCompilation.Result.generatedFiles(
     processorType: ProcessorType,
     tempDir: File
 ): List<File> = when (processorType) {
-    ProcessorType.KAPT -> outputDirectory.walkTopDown().filter { it.isFile }.toList()
+    ProcessorType.KAPT -> {
+        val outputDirFiles = outputDirectory.walkTopDown().filter { it.isFile }.toList()
+        val siblingCompilationFiles = tempDir.parentFile
+            ?.walkTopDown()
+            ?.filter { it.isFile && it.path.contains("/Kotlin-Compilation") }
+            ?.toList()
+            ?: emptyList()
+        (outputDirFiles + siblingCompilationFiles).distinct()
+    }
     ProcessorType.KSP -> kspGeneratedSources(tempDir)
 }
 
@@ -88,6 +96,13 @@ fun Collection<File>.getContentByFilename(filename: String) = this
     .find { it.name == filename }!!
     .readText()
     .trim()
+
+fun findGeneratedClassFile(tempDir: File, className: String): File =
+    (tempDir.parentFile?.walkTopDown() ?: emptySequence())
+        .filter { it.isFile && it.name == className && it.path.contains("/Kotlin-Compilation") }
+        .sortedByDescending { it.lastModified() }
+        .firstOrNull()
+        ?: error("Could not locate generated class $className under ${tempDir.parentFile}")
 
 /**
  * Double compilation hack taken from
