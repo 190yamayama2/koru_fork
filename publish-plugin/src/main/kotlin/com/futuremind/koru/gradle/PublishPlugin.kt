@@ -121,6 +121,12 @@ class PublishPlugin : Plugin<Project> {
                 artifact(javadocJar)
             }
 
+            project.tasks.matching {
+                it.name.startsWith("generateMetadataFileFor") || it.name.startsWith("generatePomFileFor")
+            }.configureEach {
+                dependsOn(javadocJar)
+            }
+
             repositories {
                 maven {
                     name = "Sonatype_OSS"
