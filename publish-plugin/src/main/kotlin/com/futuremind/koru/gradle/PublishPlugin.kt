@@ -118,7 +118,9 @@ class PublishPlugin : Plugin<Project> {
                     }
                 }
 
-                artifact(javadocJar)
+                if (name != "pluginMaven") {
+                    artifact(javadocJar)
+                }
             }
 
             project.tasks.matching {
