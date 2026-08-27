@@ -10,7 +10,7 @@ plugins {
     `kotlin-dsl`
     id("maven-publish")
     id("signing")
-    id("org.jetbrains.dokka") version "1.5.31"
+    id("org.jetbrains.dokka") version "2.0.0"
 }
 
 repositories {
@@ -18,16 +18,16 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.5.31")
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

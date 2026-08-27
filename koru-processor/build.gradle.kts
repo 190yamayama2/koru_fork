@@ -16,7 +16,7 @@ kotlin {
     //this is only used as kapt / ksp (annotation processor, so pure jvm)
     jvm {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
