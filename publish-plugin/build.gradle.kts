@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 /*
  * Using 1.5.31 in this plugin, because of https://kotlinlang.slack.com/archives/C19FD9681/p1653583730830919
  * Basically Gradle 7.4.2 uses 2.1.7 of kotlin-dsl, which depends on 1.5.31 kotlin
@@ -17,6 +19,16 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.5.31")
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 gradlePlugin {

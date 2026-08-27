@@ -1,6 +1,6 @@
 [versions]
-kotlin = "1.6.21"
-ksp = "1.6.21-1.0.6"
+kotlin = "2.4.0"
+ksp = "2.3.11"
 # 1.7.0 will cause compatibility issues with 1.6.21 projects https://youtrack.jetbrains.com/issue/KT-47771
 
 [libraries]

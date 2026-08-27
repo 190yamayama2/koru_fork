@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi::class)
+
 package com.futuremind.koru.processor
 
 import com.futuremind.koru.processor.utils.*

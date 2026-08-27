@@ -1,7 +1,6 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     kotlin("multiplatform") version libs.versions.kotlin
-    id("java-library")
     id("maven-publish")
     id("com.futuremind.koru.publish")
 }
@@ -16,7 +15,6 @@ kotlin {
     macosArm64()
     watchosArm32()
     watchosArm64()
-    watchosX86()
     watchosX64()
     tvosArm64()
     tvosX64()
@@ -51,7 +49,6 @@ kotlin {
         val macosArm64Main by getting { this.dependsOn(appleMain) }
         val watchosArm32Main by getting { this.dependsOn(appleMain) }
         val watchosArm64Main by getting { this.dependsOn(appleMain) }
-        val watchosX86Main by getting { this.dependsOn(appleMain) }
         val watchosX64Main by getting { this.dependsOn(appleMain) }
         val tvosArm64Main by getting { this.dependsOn(appleMain) }
         val tvosX64Main by getting { this.dependsOn(appleMain) }

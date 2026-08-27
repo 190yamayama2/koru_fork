@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
     /*
@@ -5,7 +7,6 @@ plugins {
         https://stackoverflow.com/questions/65830632/cant-access-commonmain-multiplatform-classes-from-a-jvm-only-module
      */
     kotlin("multiplatform") version libs.versions.kotlin
-    id("java-library")
     id("maven-publish")
     id("com.futuremind.koru.publish")
 }
@@ -14,10 +15,8 @@ kotlin {
 
     //this is only used as kapt / ksp (annotation processor, so pure jvm)
     jvm {
-        val main by compilations.getting {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
@@ -43,7 +42,7 @@ kotlin {
         val jvmTest by getting {
             dependencies {
                 val junitVersion = "5.8.2"
-                val compileTestingVersion = "1.4.9"
+                val compileTestingVersion = "1.6.0"
                 implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
                 runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
                 implementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")

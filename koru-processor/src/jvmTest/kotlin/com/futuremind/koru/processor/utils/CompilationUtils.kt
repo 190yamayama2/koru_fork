@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi::class)
+
 package com.futuremind.koru.processor.utils
 
 import com.futuremind.koru.processor.KaptProcessor
@@ -77,8 +79,8 @@ private fun prepareCompilation(
 fun KotlinCompilation.Result.generatedFiles(
     processorType: ProcessorType,
     tempDir: File
-) = when (processorType) {
-    ProcessorType.KAPT -> this.generatedFiles
+): List<File> = when (processorType) {
+    ProcessorType.KAPT -> outputDirectory.walkTopDown().filter { it.isFile }.toList()
     ProcessorType.KSP -> kspGeneratedSources(tempDir)
 }
 

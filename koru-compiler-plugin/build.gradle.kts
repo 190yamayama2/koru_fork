@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     `kotlin-dsl`
     id("maven-publish")
-    id("com.gradle.plugin-publish") version "1.0.0"
+    id("com.gradle.plugin-publish") version "1.3.1"
     id("com.futuremind.koru.publish")
 }
 
@@ -24,23 +26,17 @@ gradlePlugin {
     }
 }
 
-pluginBundle {
-    website = "https://github.com/FutureMind/koru"
-    vcsUrl = "https://github.com/FutureMind/koru"
-    tags = listOf("coroutines", "kmm", "kmp", "kotlin", "multiplatform", "native", "swift", "suspend", "flow", "kotlin-multiplatform", "kotlin-native")
-}
-
 koruPublishing {
     pomName = "Koru - Gradle Plugin"
     pomDescription = "Wrappers for suspend functions / Flow in Kotlin Native - gradle plugin."
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }

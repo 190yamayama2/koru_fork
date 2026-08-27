@@ -100,8 +100,11 @@ class KspProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor {
         generatedInterfaces: MutableMap<TypeName, GeneratedInterfaceSpec>
     ): GeneratedInterfaceSpec {
         val originalTypeSpec = classDeclaration.toTypeSpec()
-        val annotation =
-            classDeclaration.getAnnotationsByType(ToNativeInterface::class).first()
+        val annotation = classDeclaration.getAnnotationsByType(ToNativeInterface::class).firstOrNull()
+            ?: missingAnnotation(
+                annotationQualifiedName = ToNativeInterface::class.qualifiedName!!,
+                targetName = classDeclaration.qualifiedName?.asString() ?: classDeclaration.simpleName.asString()
+            )
         val originalTypeName = classDeclaration.toClassName()
         val newTypeName = interfaceName(annotation, originalTypeName.simpleName)
 
@@ -125,10 +128,19 @@ class KspProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor {
         scopeProviders: MutableMap<ClassName, PropertySpec>
     ): GeneratedClassSpec {
         val originalTypeSpec = classDeclaration.toTypeSpec()
-        val annotation = classDeclaration.getAnnotationsByType(ToNativeClass::class).first()
-        val launchOnScopeTypeName = classDeclaration.getKsAnnotationByType(ToNativeClass::class)
-            .arguments.first { it.name?.getShortName() == "launchOnScope" }
-            .let { (it.value as? KSType)?.toTypeName() }
+        val annotation = classDeclaration.getAnnotationsByType(ToNativeClass::class).firstOrNull()
+            ?: missingAnnotation(
+                annotationQualifiedName = ToNativeClass::class.qualifiedName!!,
+                targetName = classDeclaration.qualifiedName?.asString() ?: classDeclaration.simpleName.asString()
+            )
+        val launchOnScopeArgument = classDeclaration.getKsAnnotationByType(ToNativeClass::class)
+            .arguments.firstOrNull { it.name?.getShortName() == "launchOnScope" }
+            ?: missingAnnotationArgument(
+                annotationQualifiedName = ToNativeClass::class.qualifiedName!!,
+                argumentName = "launchOnScope",
+                targetName = classDeclaration.qualifiedName?.asString() ?: classDeclaration.simpleName.asString()
+            )
+        val launchOnScopeTypeName = (launchOnScopeArgument.value as? KSType)?.toTypeName()
         val originalTypeName = classDeclaration.toClassName()
         val newTypeName = className(annotation, originalTypeName.simpleName)
         val scopeProviderMemberName = findMatchingScopeProvider(
@@ -156,7 +168,12 @@ class KspProcessor(private val codeGenerator: CodeGenerator) : SymbolProcessor {
         return this.annotations.filter {
             it.shortName.getShortName() == annotationKClass.simpleName && it.annotationType.resolve().declaration
                 .qualifiedName?.asString() == annotationKClass.qualifiedName
-        }.first()
+        }.firstOrNull() ?: missingAnnotation(
+            annotationQualifiedName = annotationKClass.qualifiedName!!,
+            targetName = (this as? KSClassDeclaration)?.qualifiedName?.asString()
+                ?: (this as? KSClassDeclaration)?.simpleName?.asString()
+                ?: this::class.simpleName.orEmpty()
+        )
     }
 
     private fun CodeGenerator.writeFile(
